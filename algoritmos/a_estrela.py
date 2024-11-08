@@ -21,7 +21,7 @@ def a_estrela(grafo, inicio, fim, heuristica, dist_func):
             if dist_g < dists[vizinho]:
                 predecessor[vizinho] = atual
                 dists[vizinho] = dist_g
-                heuristica_f = dist_g + heuristica(grafo, atual, fim)
+                heuristica_f = dist_g + heuristica(grafo, vizinho, fim)
                 heappush(fila_prioridade, (heuristica_f, vizinho))
 
     if(predecessor[fim] == -1):

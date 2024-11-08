@@ -25,7 +25,7 @@ def experimento_1():
     
     # OpenStreetMap usa ids fixos para identificar nós
     # Define nós de inicio e fim
-    inicio = 492900394  # Salomão Dibbo 151
+    inicio = 505829905
     fim = 330073747  # Saída da matemática
 
     # Configurações quanto à salvar ou exibir caminhos
@@ -58,8 +58,7 @@ def experimento_1():
 
     # Salvar figura do comprimento dos caminhos
     axs.set_title('Comprimento dos caminhos por algoritmo')
-    axs.set_xlabel('Algoritmo')
-    axs.set_ylabel('Comprimento do caminho (metros)')
+    axs.set_ylabel('Comprimento do caminho (m)')
     fig_comps.tight_layout()
     fig_comps.savefig(fname="./resultados/experimento_1/comprimentos.png")
 
@@ -73,58 +72,76 @@ def experimento_2():
 
     # Selecionar 10 pares de vértices distintos
     np.random.seed(0)
-    pares_vertices = [tuple(np.random.choice(2000, 2, replace=False)) for _ in range(10)]
+    pares_vertices = [tuple(np.random.choice(2000, 2, replace=False)) for _ in range(100)]
 
     # Resultados de distância e tempo
     resultados_distancia = {nome: [] for nome in nomes_algoritmos}
     resultados_tempo = {nome: [] for nome in nomes_algoritmos}
+    resultados_ncaminhos = {nome: [] for nome in nomes_algoritmos}
 
     # função distância para o g(n) no A*
     dist_func = lambda grafo, a, b: grafo[a][b]['weight']
 
     # Avaliar os algoritmos nos grafos
-    for i, grafo in enumerate(grafos):
+    for grafo in grafos:
         for func, nome in zip(funcoes_busca, nomes_algoritmos):
             distancias = []
             tempos = []
+            n_caminhos_completos = 0
             for origem, destino in pares_vertices:
                 inicio = time.time()
                 caminho = func(grafo, origem, destino, heuristica_custom, dist_func)
                 fim = time.time()
 
-                if caminho and caminho[-1] == destino:
+                if caminho and caminho[-1]==destino:
                     distancia = sum(grafo[u][v]['weight'] for u, v in zip(caminho[:-1], caminho[1:]))
                     distancias.append(distancia)
+                    n_caminhos_completos += 1
                 tempos.append(fim - inicio)
 
             # Média das distâncias e tempos
             resultados_distancia[nome].append(np.mean(distancias) if distancias else 0)
             resultados_tempo[nome].append(np.mean(tempos))
+            resultados_ncaminhos[nome].append(n_caminhos_completos)
 
     # Plotar os gráficos
-    fig, axes = plt.subplots(2, 1, figsize=(14, 10))
+    fig, axes = plt.subplots(3, 1, figsize=(14, 14))
     x = np.arange(len(nomes_algoritmos))
     largura = 0.25
+    
     for i, label in enumerate(['λ=0.01', 'λ=0.02', 'λ=0.03']):
-        axes[0].bar(x + i * largura, [resultados_distancia[nome][i] for nome in nomes_algoritmos], 
-                    width=largura, label=label)
+        axes[0].bar(x + i * largura, [resultados_distancia[nome][i] for nome in nomes_algoritmos], width=largura, label=label)
 
     axes[0].set_title('Distância Média dos Caminhos')
     axes[0].set_xticks(x + largura, nomes_algoritmos)
     axes[0].set_ylabel('Distância Média (m)')
     axes[0].legend(loc='upper left', ncols=3)
+    axes[0].set_yscale("log")
 
     # Gráfico de tempos
     for i, label in enumerate(['λ=0.01', 'λ=0.02', 'λ=0.03']):
-        axes[1].bar(x + i * largura, [resultados_tempo[nome][i] for nome in nomes_algoritmos], 
-                    width=largura, label=label)
+        axes[1].bar(x + i * largura, [resultados_tempo[nome][i] for nome in nomes_algoritmos], width=largura, label=label)
 
     axes[1].set_title('Tempo Médio de Execução')
     axes[1].set_xticks(x + largura, nomes_algoritmos)
     axes[1].set_ylabel('Tempo (s)')
     axes[1].legend(loc='upper left', ncols=3)
+    axes[1].set_yscale("log")
 
-    fig.tight_layout
+    # Gráfico de n_caminhos
+    for i, label in enumerate(['λ=0.01', 'λ=0.02', 'λ=0.03']):
+        axes[2].bar(x + i * largura, [resultados_ncaminhos[nome][i] for nome in nomes_algoritmos], width=largura, label=label)
+
+    # Para fazer caber a legenda sem sobreposição com o gráfico    
+    y_min, y_max = axes[2].get_ylim()
+    axes[2].set_ylim(y_min, y_max*1.1)
+
+    axes[2].set_title('Número de caminhos completos encontrados')
+    axes[2].set_xticks(x + largura, nomes_algoritmos)
+    axes[2].set_ylabel('Número de caminhos')
+    axes[2].legend(loc='upper left', ncols=3)
+
+    fig.tight_layout()
     os.makedirs("./resultados/experimento_2", exist_ok=True)
     fig.savefig(fname="./resultados/experimento_2/metricas.png")
 
@@ -134,6 +151,6 @@ def experimento_3():
     return 1
 
 if __name__ == "__main__":
-    # experimento_1()
+    experimento_1()
     experimento_2()
     # experimento_3()
