@@ -1,8 +1,8 @@
-import networkx as nx
+import numpy as np
 import osmnx as ox
 
 def heuristica_custom(grafo, a, b):
-	return 10
+	return 0.9 * np.linalg.norm(grafo.nodes[a]['pos'] - grafo.nodes[b]['pos'])
 
 def heuristica_osm(grafo, a, b):
     # Calcula a distância em "linha reta" (haversine) até o destino

@@ -1,6 +1,6 @@
 from heapq import heappop, heappush
 
-def best_first(grafo, inicio, fim, heuristica):
+def best_first(grafo, inicio, fim, heuristica, dist_func):
     # Fila de prioridade para armazenar (f(n) = h(n), nó head, caminho percorrido)
     # Heap Queue do Python é min_heap por padrão, ótimo pois buscamos sempre a menor f(n)
     fila_prioridade = []

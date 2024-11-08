@@ -1,26 +1,24 @@
 import numpy as np
 import networkx as nx
 
-def dist(grafo, a, b):
-    return np.linalg.norm(grafo.nodes[a]['pos'] - grafo.nodes[b]['pos'])
-
 def gera_grafo(n, l):
     grafo = nx.Graph()
     np.random.seed(0)
 
-    #Gera Nós
-    vertices = np.random.rand(n, 2)*n
-    grafo.add_nodes_from([ (i, dict(pos=vert)) for i, vert in enumerate(vertices) ])
+    # Gera nós com coordenadas aleatórias em um plano de tamanho n x n
+    vertices = np.random.rand(n, 2) * n
+    grafo.add_nodes_from([(i, {'pos': vert}) for i, vert in enumerate(vertices)])
 
-    #Gera Arestas
-    for i in range(len(vertices)):
-        for j in range(i):
-            if (dist(grafo, i, j)*l < np.random.rand()):
-                grafo.add_edge(i, j)
+    # Adiciona arestas com base na probabilidade p
+    for i in range(n):
+        for j in range(i + 1, n):  # Evita repetir pares e autoconexões
+            distancia = np.linalg.norm(grafo.nodes[i]['pos'] - grafo.nodes[j]['pos'])  # Distância geométrica entre i e j
 
+            # Calcula a probabilidade P(i -> j)
+            p = np.exp(-l * distancia)
+
+            # Adiciona a aresta com probabilidade p
+            if np.random.rand() < p:
+                grafo.add_edge(i, j, weight=distancia)
+    
     return grafo
-
-# grafo = gera_grafo(500, 0.011)
-
-# Plotar o grafo
-# nx.draw(grafo, nx.get_node_attributes(grafo, 'pos'), node_size=10)

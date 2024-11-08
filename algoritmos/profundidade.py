@@ -1,4 +1,4 @@
-def busca_profundidade(grafo, inicio, fim):
+def busca_profundidade(grafo, inicio, fim, heuristica, dist_func):
     pilha = [(inicio, [inicio])]
     processados = set()
 
