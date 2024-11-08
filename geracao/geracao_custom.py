@@ -1,14 +1,12 @@
 import numpy as np
 import networkx as nx
-import matplotlib.pyplot as plt
-
 
 def dist(grafo, a, b):
     return np.linalg.norm(grafo.nodes[a]['pos'] - grafo.nodes[b]['pos'])
 
 def gera_grafo(n, l):
     grafo = nx.Graph()
-    #np.random.seed(0)
+    np.random.seed(0)
 
     #Gera Nós
     vertices = np.random.rand(n, 2)*n
@@ -22,9 +20,7 @@ def gera_grafo(n, l):
 
     return grafo
 
-grafo = gera_grafo(500, 0.011)
+# grafo = gera_grafo(500, 0.011)
 
-
-##Plota o grafo
-nx.draw(grafo, nx.get_node_attributes(grafo, 'pos'), node_size=10)
-plt.show()
+# Plotar o grafo
+# nx.draw(grafo, nx.get_node_attributes(grafo, 'pos'), node_size=10)
