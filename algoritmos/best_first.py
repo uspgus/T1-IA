@@ -1,5 +1,6 @@
 from heapq import heappop, heappush
 
+# Recebe dist_func, mas não usa, a função é definida assim apenas para poder padronizar a avaliação nos experimentos
 def best_first(grafo, inicio, fim, heuristica, dist_func):
     # Fila de prioridade para armazenar (f(n) = h(n), nó head, caminho percorrido)
     # Heap Queue do Python é min_heap por padrão, ótimo pois buscamos sempre a menor f(n)

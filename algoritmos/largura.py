@@ -1,3 +1,4 @@
+# Recebe dist_func e heuristica, mas não usa, a função é definida assim apenas para poder padronizar a avaliação nos experimentos
 def busca_largura(grafo, inicio, fim, heuristica, dist_func):
     # Lista que atua como fila, a agenda do algoritmo, armazenando o nó atual e o próprio caminho
     fila = [(inicio, [inicio])]  # Cada item: (nó atual, comprimento do caminho, caminho)

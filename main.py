@@ -102,6 +102,7 @@ def experimento_2(grafos, pares_vertices):
     x = np.arange(len(nomes_algoritmos))
     largura = 0.25
     
+    # Gráfico de distância média
     for i, label in enumerate(['λ=0.01', 'λ=0.02', 'λ=0.03']):
         axes[0].bar(x + i * largura, [resultados_distancia[nome][i] for nome in nomes_algoritmos], width=largura, label=label)
 
@@ -140,15 +141,18 @@ def experimento_2(grafos, pares_vertices):
     fig.savefig(fname="./resultados/experimento_2/metricas.png")
 
 def experimento_3(grafos, pares_vertices):
+    # Função distância para computar g(n)
     dist_func = lambda grafo, a, b: grafo[a][b]['weight']
 
     funcs = [a_estrela, dijkstra]
     nomes_algoritmos = ["A*", "Dijkstra"]
 
+    # Resultados dos algoritmos
     resultados_distancia = {nome: [] for nome in nomes_algoritmos}
     resultados_tempo = {nome: [] for nome in nomes_algoritmos}
     resultados_explorados = {nome: [] for nome in nomes_algoritmos}
 
+    # Avaliar algoritmos
     for grafo in grafos:
         for func, nome in zip(funcs, nomes_algoritmos):
             distancias = []
@@ -176,6 +180,7 @@ def experimento_3(grafos, pares_vertices):
     x = np.arange(len(nomes_algoritmos))
     largura = 0.25
 
+    # Plot das métricas de avaliação
     def metric_plot(ax, data, title, ylabel):
         for i, label in enumerate(['λ=0.01', 'λ=0.02', 'λ=0.03']):
             ax.bar(x + i * largura, [data[nome][i] for nome in nomes_algoritmos], width=largura, label=label)
@@ -194,10 +199,13 @@ def experimento_3(grafos, pares_vertices):
     os.makedirs("./resultados/experimento_3", exist_ok=True)
     fig.savefig(fname="./resultados/experimento_3/comparacao.png")
 
-    # Visualização de um dos caminhos gerados pelo dijkstra e A*
+    # Visualização do espaço de busca usado peloa algoritmos Dijkstra e A*
     path_fig, path_axes = plt.subplots(2, 1, figsize=(10, 14))
 
     def path_plot(ax, grafo, arestas, title, cores):
+        # Plota nos inicio e fim maiores em vermelho
+        # Nós explorados recebem uma cor do colormap
+        # Nós não explorados são rosa
         pos = nx.get_node_attributes(grafo, 'pos')
         nx.draw_networkx_nodes(grafo, pos, node_color="#fc03df", node_size=100, ax=ax)
         nx.draw_networkx(grafo, pos, node_size=150, node_color=cores, cmap=cm.viridis, ax=ax, with_labels=False)
@@ -209,6 +217,7 @@ def experimento_3(grafos, pares_vertices):
     inicio = 99
     fim = 5
 
+    # Encontra caminho, gera uma lista de arestas no caminho
     caminho_a, dists_a = a_estrela(grafo_vis, inicio, fim, heuristica_custom, dist_func, return_dists=True)
     arestas_a = list(zip(caminho_a[:-1], caminho_a[1:]))
     cores_a = [dists_a[key] for key in sorted(dists_a.keys())]
