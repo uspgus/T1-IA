@@ -1,13 +1,13 @@
 import numpy as np
 from heapq import heappop, heappush
 
-def a_estrela(grafo, inicio, fim, heuristica, dist_func, return_dists=False):
+def dijkstra(grafo, inicio, fim, heuristica, dist_func, return_dists=False):
     dists = { no:np.inf for no in grafo.nodes}
     predecessor = { no:-1 for no in grafo.nodes}
     dists[inicio] = 0
 
     fila_prioridade = []
-    heappush(fila_prioridade, (heuristica(grafo, inicio, fim), inicio))
+    heappush(fila_prioridade, (0, inicio))
 
     while fila_prioridade:
         _, atual = heappop(fila_prioridade)
@@ -21,8 +21,7 @@ def a_estrela(grafo, inicio, fim, heuristica, dist_func, return_dists=False):
             if dist_g < dists[vizinho]:
                 predecessor[vizinho] = atual
                 dists[vizinho] = dist_g
-                heuristica_f = dist_g + heuristica(grafo, vizinho, fim)
-                heappush(fila_prioridade, (heuristica_f, vizinho))
+                heappush(fila_prioridade, (dist_g, vizinho))
 
     if(predecessor[fim] == -1):
         if return_dists:

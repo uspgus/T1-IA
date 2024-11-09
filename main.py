@@ -7,7 +7,7 @@
 import warnings
 warnings.simplefilter("ignore", category=FutureWarning) # evitar avisos dos modulos como matplotlibe e osmnx
 
-from algoritmos import a_estrela, a_estrela_countexp, best_first, hill_climbing, busca_largura, busca_profundidade
+from algoritmos import a_estrela, best_first, dijkstra, hill_climbing, busca_largura, busca_profundidade
 from geracao import geracacao_osm, geracao_custom
 from heuristicas import heuristica_osm, heuristica_custom
 
@@ -139,9 +139,10 @@ def experimento_2(grafos, pares_vertices):
     os.makedirs("./resultados/experimento_2", exist_ok=True)
     fig.savefig(fname="./resultados/experimento_2/metricas.png")
 
-
 def experimento_3(grafos, pares_vertices):
     dist_func = lambda grafo, a, b: grafo[a][b]['weight']
+
+    funcs = [a_estrela, dijkstra]
     nomes_algoritmos = ["A*", "Dijkstra"]
 
     resultados_distancia = {nome: [] for nome in nomes_algoritmos}
@@ -149,25 +150,20 @@ def experimento_3(grafos, pares_vertices):
     resultados_explorados = {nome: [] for nome in nomes_algoritmos}
 
     for grafo in grafos:
-        # Usando lambda + clojure pra transformar A* em Dijkstra (h(n) = 0, para todo n)
-        a_est = lambda orig, dest: a_estrela_countexp(grafo, orig, dest, heuristica_custom, dist_func)
-        dijkstra = lambda orig, dest : a_estrela_countexp(grafo, orig, dest, lambda x, y, z: 0, dist_func)
-
-        funcs = [a_est, dijkstra]
-
         for func, nome in zip(funcs, nomes_algoritmos):
             distancias = []
             tempos = []
             explorados = []
             for origem, destino in pares_vertices:
                 t_inicio = time.time()
-                caminho, n_explorados = func(origem, destino)
+                caminho, dists = func(grafo, origem, destino, heuristica_custom, dist_func, return_dists=True)
                 t_fim = time.time()
 
                 if caminho and caminho[-1]==destino:
                     distancia = sum(grafo[u][v]['weight'] for u, v in zip(caminho[:-1], caminho[1:]))
                     distancias.append(distancia)
                 tempos.append(t_fim - t_inicio)
+                n_explorados = sum(1 for value in dists.values() if value != np.inf)
                 explorados.append(n_explorados)
         
             # Média das distâncias e tempos
@@ -203,6 +199,7 @@ def experimento_3(grafos, pares_vertices):
 
     def path_plot(ax, grafo, arestas, title, cores):
         pos = nx.get_node_attributes(grafo, 'pos')
+        nx.draw_networkx_nodes(grafo, pos, node_color="#fc03df", node_size=100, ax=ax)
         nx.draw_networkx(grafo, pos, node_size=150, node_color=cores, cmap=cm.viridis, ax=ax, with_labels=False)
         nx.draw_networkx_nodes(grafo, pos, nodelist=[inicio, fim], node_color="red", node_size=300, ax=ax)
         nx.draw_networkx_edges(grafo, pos, edgelist=arestas, edge_color="red", width=2, ax=ax)
@@ -212,21 +209,18 @@ def experimento_3(grafos, pares_vertices):
     inicio = 99
     fim = 5
 
-    caminho_a = a_estrela(grafo_vis, inicio, fim, heuristica_custom, dist_func)
+    caminho_a, dists_a = a_estrela(grafo_vis, inicio, fim, heuristica_custom, dist_func, return_dists=True)
     arestas_a = list(zip(caminho_a[:-1], caminho_a[1:]))
+    cores_a = [dists_a[key] for key in sorted(dists_a.keys())]
 
-    # A* com heuristica h(n) = 0 é o Dijkstra
-    caminho_dij = a_estrela(grafo_vis, inicio, fim, lambda x, y, z: 0, dist_func)
+    caminho_dij, dists_dij = dijkstra(grafo_vis, inicio, fim, heuristica_custom, dist_func, return_dists=True)
     arestas_dij = list(zip(caminho_dij[:-1], caminho_dij[1:]))
+    cores_dij = [dists_dij[key] for key in sorted(dists_dij.keys())]
 
-    # Para coloração
-    dists = nx.single_source_shortest_path_length(grafo_vis, inicio)
-    cores_nos = [dists.get(node, float('inf')) for node in sorted(list(grafo_vis.nodes()))]
+    path_plot(path_axes[0], grafo_vis, arestas_a, "A*", cores_a)
+    path_plot(path_axes[1], grafo_vis, arestas_dij, "Dijkstra", cores_dij)
 
-    path_plot(path_axes[0], grafo_vis, arestas_a, "A*", cores_nos)
-    path_plot(path_axes[1], grafo_vis, arestas_dij, "Dijkstra", cores_nos)
-
-    path_fig.suptitle('Visualização dos caminhos', fontsize=16)
+    path_fig.suptitle('Visualização dos caminhos (N=100, λ=0.07)', fontsize=16)
     path_fig.tight_layout()
     path_fig.savefig(fname="./resultados/experimento_3/caminhos.png")
 
